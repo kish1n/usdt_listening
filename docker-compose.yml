@@ -1,0 +1,27 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1029
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1029
+      DB_HOST: db
+      DB_PORT: 5432
+      KV_VIPER_FILE: /usr/local/bin/config.yaml
+      API_KEY: 02b3e560f25f4d0db54c9fa4519c7c24
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    command: ["run", "service"]
