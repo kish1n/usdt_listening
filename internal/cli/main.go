@@ -44,7 +44,9 @@ func Run(args []string) bool {
 		err = MigrateUp(cfg)
 	case migrateDownCmd.FullCommand():
 		err = MigrateDown(cfg)
+
 	// handle any custom commands here in the same way
+
 	default:
 		log.Errorf("unknown command %s", cmd)
 		return false

@@ -4,6 +4,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/kish1n/usdt_listening/internal/config"
 	"github.com/kish1n/usdt_listening/internal/data/pg"
+	"github.com/kish1n/usdt_listening/internal/service/handlers"
 	"github.com/kish1n/usdt_listening/internal/service/helpers"
 	"gitlab.com/distributed_lab/ape"
 	"net/http"
@@ -22,8 +23,9 @@ func (s *service) router(cfg config.Config) (chi.Router, error) {
 		),
 	)
 
-	r.Route("/integrations/usdt_listening", func(r chi.Router) {
-
+	r.Route("/", func(r chi.Router) {
+		r.Get("/eth", handlers.InitEthereumClient)
+		r.Get("/listen", handlers.ListenForTransfers)
 	})
 
 	logger.Info("Starting server on :8080")
