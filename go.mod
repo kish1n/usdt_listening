@@ -6,7 +6,10 @@ require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/alecthomas/kingpin v2.2.6+incompatible
 	github.com/ethereum/go-ethereum v1.14.7
+	github.com/fatih/structs v1.1.0
 	github.com/go-chi/chi v4.1.2+incompatible
+	github.com/google/jsonapi v0.0.0-20200226002910-c8283f632fb7
+	github.com/google/uuid v1.6.0
 	github.com/lib/pq v1.10.9
 	github.com/rubenv/sql-migrate v1.7.0
 	gitlab.com/distributed_lab/ape v1.7.1
@@ -34,7 +37,6 @@ require (
 	github.com/go-gorp/gorp/v3 v3.1.0 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-ozzo/ozzo-validation/v4 v4.2.1 // indirect
-	github.com/google/jsonapi v0.0.0-20200226002910-c8283f632fb7 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/holiman/uint256 v1.3.0 // indirect

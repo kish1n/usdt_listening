@@ -1,7 +1,7 @@
 -- +migrate Up
 
 CREATE TABLE transfers (
-   id SERIAL PRIMARY KEY,
+   id UUID PRIMARY KEY,
    from_address VARCHAR(42) NOT NULL,
    to_address VARCHAR(42) NOT NULL,
    value NUMERIC NOT NULL,
@@ -9,3 +9,4 @@ CREATE TABLE transfers (
 );
 
 -- +migrate Down
+DROP TABLE transfers;

@@ -2,8 +2,10 @@ package pg
 
 import (
 	sq "github.com/Masterminds/squirrel"
+	"github.com/fatih/structs"
 	"github.com/kish1n/usdt_listening/internal/data"
 	"gitlab.com/distributed_lab/kit/pgdb"
+	"gitlab.com/distributed_lab/logan/v3/errors"
 )
 
 const tableName = "transfers"
@@ -20,45 +22,14 @@ type TransactionQ struct {
 	sql sq.StatementBuilderType
 }
 
-//func ListenForTransfers(db *sql.DB, contractAddress common.Address, contractABI string) {
-//	query := ethereum.FilterQuery{
-//		Addresses: []common.Address{contractAddress},
-//	}
-//
-//	logs := make(chan types.Log)
-//	sub, err := Client.SubscribeFilterLogs(context.Background(), query, logs)
-//	if err != nil {
-//		log.Fatalf("Failed to subscribe to logs: %v", err)
-//	}
-//
-//	parsedABI, err := abi.JSON(strings.NewReader(contractABI))
-//	if err != nil {
-//		log.Fatalf("Failed to parse contract ABI: %v", err)
-//	}
-//
-//	for {
-//		select {
-//		case err := <-sub.Err():
-//			log.Fatalf("Error: %v", err)
-//		case vLog := <-logs:
-//			var transferEvent Transfer
-//			err := parsedABI.UnpackIntoInterface(&transferEvent, "Transfer", vLog.Data)
-//			if err != nil {
-//				log.Fatalf("Failed to unpack log: %v", err)
-//			}
-//
-//			transferEvent.From = common.HexToAddress(vLog.Topics[1].Hex())
-//			transferEvent.To = common.HexToAddress(vLog.Topics[2].Hex())
-//
-//			log.Printf("Transfer event: from %s to %s for %d tokens", transferEvent.From.Hex(), transferEvent.To.Hex(), transferEvent.Value)
-//
-//			_, err = db.Exec(
-//				"INSERT INTO transfers (from_address, to_address, value) VALUES ($1, $2, $3)",
-//				transferEvent.From.Hex(), transferEvent.To.Hex(), transferEvent.Value,
-//			)
-//			if err != nil {
-//				log.Fatalf("Failed to insert transfer event into database: %v", err)
-//			}
-//		}
-//	}
-//}
+func (q *TransactionQ) Insert(trn data.TransactionData) (*data.TransactionData, error) {
+	clauses := structs.Map(trn)
+
+	var result data.TransactionData
+	stmt := sq.Insert(tableName).SetMap(clauses).Suffix("returning *")
+	err := q.db.Get(&result, stmt)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to insert transaction to db")
+	}
+	return &result, nil
+}

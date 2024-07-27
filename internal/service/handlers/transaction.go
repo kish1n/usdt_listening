@@ -7,21 +7,38 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/fatih/structs"
+	"github.com/google/jsonapi"
+	"github.com/google/uuid"
+	"github.com/kish1n/usdt_listening/internal/data"
 	"github.com/kish1n/usdt_listening/internal/service/helpers"
+	"gitlab.com/distributed_lab/ape"
 	"io/ioutil"
+	"log"
 	"math/big"
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 type Transfer struct {
 	From  common.Address
 	To    common.Address
 	Value *big.Int
+	Index int
+	Time  time.Time
 }
 
 var Client *ethclient.Client
+
+func GenerateUUID() string {
+	id, err := uuid.NewUUID()
+	if err != nil {
+		log.Fatalf("Failed to generate UUID: %v", err)
+	}
+	return id.String()
+}
 
 func InitEthereumClient(w http.ResponseWriter, r *http.Request) {
 	logger := helpers.Log(r)
@@ -83,6 +100,8 @@ func ListenForTransfers(w http.ResponseWriter, r *http.Request) {
 		logger.Fatalf("Failed to parse contract ABI: %v", err)
 	}
 
+	db := helpers.DB(r)
+
 	for {
 		select {
 		case err := <-sub.Err():
@@ -98,8 +117,32 @@ func ListenForTransfers(w http.ResponseWriter, r *http.Request) {
 
 			transferEvent.From = common.HexToAddress(vLog.Topics[1].Hex())
 			transferEvent.To = common.HexToAddress(vLog.Topics[2].Hex())
+			logger.Infof("success unpack log %s to %s", transferEvent, transferEvent.To)
+			stmt := data.TransactionData{
+				From_address: transferEvent.From.Hex(),
+				To_address:   transferEvent.To.Hex(),
+				Value:        transferEvent.Value.Int64(),
+				Id:           GenerateUUID(),
+				Timestamp:    time.Now(),
+			}
 
-			logger.Infof("Transfer event: from %s to %s for %d tokens", transferEvent.From.Hex(), transferEvent.To.Hex(), transferEvent.Value)
+			test := structs.Map(stmt)
+			logger.Infof("test %s", test)
+
+			res, err := db.Link().Insert(stmt)
+
+			if err != nil {
+				logger.WithError(err).Debug("Server error")
+				ape.Render(w, &jsonapi.ErrorObject{
+					Status: "500",
+					Title:  "Server error 500",
+					Detail: "Unpredictable behavior",
+				})
+				return
+			}
+
+			logger.Infof("Transfer event: from %s to %s for %d tokens", res.From_address,
+				res.To_address, res.Value)
 		}
 	}
 }

@@ -26,6 +26,9 @@ func (s *service) router(cfg config.Config) (chi.Router, error) {
 	r.Route("/", func(r chi.Router) {
 		r.Get("/eth", handlers.InitEthereumClient)
 		r.Get("/listen", handlers.ListenForTransfers)
+		r.Get("/from/{from_address}", handlers.SortFrom)
+		r.Get("/to/{to_address}", handlers.SortTo)
+		r.Get("/by/{address", handlers.SortByAdress)
 	})
 
 	logger.Info("Starting server on :8080")
