@@ -24,7 +24,6 @@ type TransactionQ struct {
 
 func (q *TransactionQ) Insert(trn data.TransactionData) (*data.TransactionData, error) {
 	clauses := structs.Map(trn)
-
 	var result data.TransactionData
 	stmt := sq.Insert(tableName).SetMap(clauses).Suffix("returning *")
 	err := q.db.Get(&result, stmt)

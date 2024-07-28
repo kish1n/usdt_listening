@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"github.com/google/jsonapi"
 	"github.com/kish1n/usdt_listening/internal/data"
+	"github.com/kish1n/usdt_listening/internal/service/errors/apierrors"
 	"github.com/kish1n/usdt_listening/internal/service/helpers"
 	"gitlab.com/distributed_lab/ape"
 	"net/http"
@@ -12,26 +12,15 @@ func SortBySender(w http.ResponseWriter, r *http.Request) {
 	logger := helpers.Log(r)
 	db := helpers.DB(r)
 	address, err := helpers.GetAddress(r, "from_address")
-	logger.Infof("from_address %s:", address)
 	res, err := db.Link().SortByParameter(address, "from_address")
 
 	if res == nil {
-		logger.WithError(err).Debug("Not Found 404")
-		ape.Render(w, &jsonapi.ErrorObject{
-			Status: "404",
-			Title:  "Not Found 404",
-			Detail: "Nonexistent link",
-		})
+		apierrors.ErrorConstructor(w, *logger, err, "404 not found", "404", "Not Found", "Not found transaction from this address")
 		return
 	}
 
 	if err != nil {
-		logger.WithError(err).Debug("Server error")
-		ape.Render(w, &jsonapi.ErrorObject{
-			Status: "500",
-			Title:  "Server error 500",
-			Detail: "Unpredictable behavior",
-		})
+		apierrors.ErrorConstructor(w, *logger, err, "Server error", "500", "Server error 500", "Unpredictable behavior")
 		return
 	}
 
@@ -48,22 +37,12 @@ func SortByRecipient(w http.ResponseWriter, r *http.Request) {
 	res, err := db.Link().SortByParameter(address, "to_address")
 
 	if res == nil {
-		logger.WithError(err).Debug("Not Found 404")
-		ape.Render(w, &jsonapi.ErrorObject{
-			Status: "404",
-			Title:  "Not Found 404",
-			Detail: "Nonexistent link",
-		})
+		apierrors.ErrorConstructor(w, *logger, err, "404 not found", "404", "Not Found", "Not found transaction to this address")
 		return
 	}
 
 	if err != nil {
-		logger.WithError(err).Debug("Server error")
-		ape.Render(w, &jsonapi.ErrorObject{
-			Status: "500",
-			Title:  "Server error 500",
-			Detail: "Unpredictable behavior",
-		})
+		apierrors.ErrorConstructor(w, *logger, err, "Server error", "500", "Server error 500", "Unpredictable behavior")
 		return
 	}
 
@@ -80,24 +59,13 @@ func SortByAddress(w http.ResponseWriter, r *http.Request) {
 	start, err := db.Link().SortByParameter(address, "to_address")
 	end, err := db.Link().SortByParameter(address, "from_address")
 
-	logger.Infof("res: %s", start)
-	logger.Infof("res: %s", end)
-
 	if end == nil && start == nil {
-		ape.Render(w, &jsonapi.ErrorObject{
-			Status: "404",
-			Title:  "Not Found 404",
-			Detail: "Nonexistent link",
-		})
+		apierrors.ErrorConstructor(w, *logger, err, "404 not found", "404", "Not Found", "Not found transaction at this address")
 		return
 	}
 
 	if err != nil {
-		ape.Render(w, &jsonapi.ErrorObject{
-			Status: "500",
-			Title:  "Server error 500",
-			Detail: "Unpredictable behavior",
-		})
+		apierrors.ErrorConstructor(w, *logger, err, "Server error", "500", "Server error 500", "Unpredictable behavior")
 		return
 	}
 
@@ -105,5 +73,7 @@ func SortByAddress(w http.ResponseWriter, r *http.Request) {
 		"send": start,
 	}
 
+	logger.Infof("res: %s", response)
 	ape.Render(w, response)
+	return
 }

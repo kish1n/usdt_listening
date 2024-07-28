@@ -13,7 +13,6 @@ FROM alpine:3.9
 
 COPY --from=buildbase /usr/local/bin/usdt_listening /usr/local/bin/usdt_listening
 COPY config.yaml /usr/local/bin/config.yaml
-COPY .env /usr/local/bin/.env
 COPY contractABI.json /usr/local/bin/contractABI.json
 RUN apk add --no-cache ca-certificates
 

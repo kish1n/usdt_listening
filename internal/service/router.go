@@ -24,7 +24,6 @@ func (s *service) router(cfg config.Config) (chi.Router, error) {
 	)
 
 	r.Route("/", func(r chi.Router) {
-		r.Get("/eth", handlers.InitEthereumClient)
 		r.Get("/listen", handlers.ListenForTransfers)
 		r.Get("/from/{from_address}", handlers.SortBySender)
 		r.Get("/to/{to_address}", handlers.SortByRecipient)

@@ -8,10 +8,9 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/fatih/structs"
-	"github.com/google/jsonapi"
 	"github.com/kish1n/usdt_listening/internal/data"
+	"github.com/kish1n/usdt_listening/internal/service/errors/apierrors"
 	"github.com/kish1n/usdt_listening/internal/service/helpers"
-	"gitlab.com/distributed_lab/ape"
 	"math/big"
 	"net/http"
 	"os"
@@ -29,30 +28,18 @@ type Transfer struct {
 
 var Client *ethclient.Client
 
-func InitEthereumClient(w http.ResponseWriter, r *http.Request) {
-	logger := helpers.Log(r)
-
-	ProjectID := os.Getenv("API_KEY")
-	logger.Info(ProjectID)
-	client, err := ethclient.Dial("https://mainnet.infura.io/v3/" + ProjectID)
-
-	if err != nil {
-		logger.Fatalf("Failed to connect to the Ethereum client: %v", err)
-	}
-
-	Client = client
-	logger.Infof("Connected to Ethereum client")
-}
-
 func ListenForTransfers(w http.ResponseWriter, r *http.Request) {
 	logger := helpers.Log(r)
 
 	ProjectID := os.Getenv("API_KEY")
+
 	logger.Info(ProjectID)
 	client, err := ethclient.Dial("wss://mainnet.infura.io/ws/v3/" + ProjectID)
 
 	if err != nil {
 		logger.Fatalf("Failed to connect to the Ethereum client: %v", err)
+		apierrors.ErrorConstructor(w, *logger, err, "Server error", "500", "Server error 500", "Unpredictable behavior")
+		return
 	}
 
 	Client = client
@@ -67,18 +54,27 @@ func ListenForTransfers(w http.ResponseWriter, r *http.Request) {
 	logs := make(chan types.Log)
 
 	sub, err := Client.SubscribeFilterLogs(context.Background(), query, logs)
+
 	if err != nil {
 		logger.Fatalf("Failed to subscribe to logs: %v", err)
+		apierrors.ErrorConstructor(w, *logger, err, "Server error", "500", "Server error 500", "Unpredictable behavior")
+		return
 	}
 
-	contractABIJSON, err := helpers.ReadABIFile("contractABI.json")
+	contractABIJSON, err := helpers.ReadABIFile("/usr/local/bin/contractABI.json")
+
 	if err != nil {
 		logger.Fatalf("Failed to read contract ABI file: %v", err)
+		apierrors.ErrorConstructor(w, *logger, err, "Server error", "500", "Server error 500", "Unpredictable behavior")
+		return
 	}
 
 	contractABI, err := abi.JSON(strings.NewReader(contractABIJSON))
+
 	if err != nil {
 		logger.Fatalf("Failed to parse contract ABI: %v", err)
+		apierrors.ErrorConstructor(w, *logger, err, "Server error", "500", "Server error 500", "Unpredictable behavior")
+		return
 	}
 
 	db := helpers.DB(r)
@@ -98,7 +94,7 @@ func ListenForTransfers(w http.ResponseWriter, r *http.Request) {
 
 			transferEvent.From = common.HexToAddress(vLog.Topics[1].Hex())
 			transferEvent.To = common.HexToAddress(vLog.Topics[2].Hex())
-			logger.Infof("success unpack log %s to %s", transferEvent, transferEvent.To)
+
 			stmt := data.TransactionData{
 				FromAddress: transferEvent.From.Hex(),
 				ToAddress:   transferEvent.To.Hex(),
@@ -113,12 +109,7 @@ func ListenForTransfers(w http.ResponseWriter, r *http.Request) {
 			res, err := db.Link().Insert(stmt)
 
 			if err != nil {
-				logger.WithError(err).Debug("Server error")
-				ape.Render(w, &jsonapi.ErrorObject{
-					Status: "500",
-					Title:  "Server error 500",
-					Detail: "Unpredictable behavior",
-				})
+				apierrors.ErrorConstructor(w, *logger, err, "Server error", "500", "Server error 500", "Unpredictable behavior")
 				return
 			}
 
