@@ -43,8 +43,8 @@ func SortBySender(w http.ResponseWriter, r *http.Request) {
 func SortByRecipient(w http.ResponseWriter, r *http.Request) {
 	logger := helpers.Log(r)
 	db := helpers.DB(r)
+
 	address, err := helpers.GetAddress(r, "to_address")
-	logger.Infof("from_address %s:", address)
 	res, err := db.Link().SortByParameter(address, "to_address")
 
 	if res == nil {
@@ -76,16 +76,14 @@ func SortByAddress(w http.ResponseWriter, r *http.Request) {
 	logger := helpers.Log(r)
 	db := helpers.DB(r)
 
-	sender, err := helpers.GetAddress(r, "to_address")
-	logger.Infof("from_address %s:", sender)
-	start, err := db.Link().SortByParameter(sender, "to_address")
+	address, err := helpers.GetAddress(r, "address")
+	start, err := db.Link().SortByParameter(address, "to_address")
+	end, err := db.Link().SortByParameter(address, "from_address")
 
-	recipient, err := helpers.GetAddress(r, "from_address")
-	logger.Infof("from_address %s:", recipient)
-	end, err := db.Link().SortByParameter(recipient, "from_address")
+	logger.Infof("res: %s", start)
+	logger.Infof("res: %s", end)
 
 	if end == nil && start == nil {
-		logger.Errorf("Not Found 404 %s", err)
 		ape.Render(w, &jsonapi.ErrorObject{
 			Status: "404",
 			Title:  "Not Found 404",
@@ -95,7 +93,6 @@ func SortByAddress(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		logger.Errorf("Not Found 404 %s", err)
 		ape.Render(w, &jsonapi.ErrorObject{
 			Status: "500",
 			Title:  "Server error 500",
@@ -106,7 +103,6 @@ func SortByAddress(w http.ResponseWriter, r *http.Request) {
 
 	response := map[string][]data.TransactionData{
 		"send": start,
-		"get":  end,
 	}
 
 	ape.Render(w, response)
