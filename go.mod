@@ -10,6 +10,7 @@ require (
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/google/jsonapi v0.0.0-20200226002910-c8283f632fb7
 	github.com/google/uuid v1.6.0
+	github.com/gorilla/mux v1.8.0
 	github.com/lib/pq v1.10.9
 	github.com/rubenv/sql-migrate v1.7.0
 	gitlab.com/distributed_lab/ape v1.7.1

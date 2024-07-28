@@ -9,12 +9,9 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/fatih/structs"
 	"github.com/google/jsonapi"
-	"github.com/google/uuid"
 	"github.com/kish1n/usdt_listening/internal/data"
 	"github.com/kish1n/usdt_listening/internal/service/helpers"
 	"gitlab.com/distributed_lab/ape"
-	"io/ioutil"
-	"log"
 	"math/big"
 	"net/http"
 	"os"
@@ -32,14 +29,6 @@ type Transfer struct {
 
 var Client *ethclient.Client
 
-func GenerateUUID() string {
-	id, err := uuid.NewUUID()
-	if err != nil {
-		log.Fatalf("Failed to generate UUID: %v", err)
-	}
-	return id.String()
-}
-
 func InitEthereumClient(w http.ResponseWriter, r *http.Request) {
 	logger := helpers.Log(r)
 
@@ -53,14 +42,6 @@ func InitEthereumClient(w http.ResponseWriter, r *http.Request) {
 
 	Client = client
 	logger.Infof("Connected to Ethereum client")
-}
-
-func readABIFile(filePath string) (string, error) {
-	data, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		return "", err
-	}
-	return string(data), nil
 }
 
 func ListenForTransfers(w http.ResponseWriter, r *http.Request) {
@@ -90,7 +71,7 @@ func ListenForTransfers(w http.ResponseWriter, r *http.Request) {
 		logger.Fatalf("Failed to subscribe to logs: %v", err)
 	}
 
-	contractABIJSON, err := readABIFile("/usr/local/bin/contractABI.json")
+	contractABIJSON, err := helpers.ReadABIFile("contractABI.json")
 	if err != nil {
 		logger.Fatalf("Failed to read contract ABI file: %v", err)
 	}
@@ -119,11 +100,11 @@ func ListenForTransfers(w http.ResponseWriter, r *http.Request) {
 			transferEvent.To = common.HexToAddress(vLog.Topics[2].Hex())
 			logger.Infof("success unpack log %s to %s", transferEvent, transferEvent.To)
 			stmt := data.TransactionData{
-				From_address: transferEvent.From.Hex(),
-				To_address:   transferEvent.To.Hex(),
-				Value:        transferEvent.Value.Int64(),
-				Id:           GenerateUUID(),
-				Timestamp:    time.Now(),
+				FromAddress: transferEvent.From.Hex(),
+				ToAddress:   transferEvent.To.Hex(),
+				Value:       transferEvent.Value.Int64(),
+				Id:          helpers.GenerateUUID(),
+				Timestamp:   time.Now(),
 			}
 
 			test := structs.Map(stmt)
@@ -141,8 +122,8 @@ func ListenForTransfers(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			logger.Infof("Transfer event: from %s to %s for %d tokens", res.From_address,
-				res.To_address, res.Value)
+			logger.Infof("Transfer event: from %s to %s for %d tokens", res.FromAddress,
+				res.ToAddress, res.Value)
 		}
 	}
 }
