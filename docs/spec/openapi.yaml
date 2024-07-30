@@ -1,4 +1,4 @@
-openapi: 3.0.0
+gitopenapi: 3.0.0
 info:
   version: 1.0.0
   title: usdt_listening
@@ -6,3 +6,21 @@ info:
 servers:
   - url: 'https://api.demo.tokend.io'
     description: TokenD Developer Environment
+paths:
+  /listen:
+    get:
+      tags:
+        - listen logs
+      summary: Create a shortlink
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref:
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: '#/components/schemas/transactionData'
