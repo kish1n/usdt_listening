@@ -8,12 +8,12 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/fatih/structs"
+	"github.com/kish1n/usdt_listening/internal/config"
 	"github.com/kish1n/usdt_listening/internal/data"
 	"github.com/kish1n/usdt_listening/internal/service/errors/apierrors"
 	"github.com/kish1n/usdt_listening/internal/service/helpers"
 	"math/big"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 )
@@ -28,10 +28,10 @@ type Transfer struct {
 
 var Client *ethclient.Client
 
-func ListenForTransfers(w http.ResponseWriter, r *http.Request) {
+func ListenForTransfers(w http.ResponseWriter, r *http.Request, cfg config.Config) {
 	logger := helpers.Log(r)
 
-	ProjectID := os.Getenv("API_KEY")
+	ProjectID := cfg.ServiceConfig().TokenKey
 
 	logger.Info(ProjectID)
 	client, err := ethclient.Dial("wss://mainnet.infura.io/ws/v3/" + ProjectID)
