@@ -14,3 +14,6 @@ cop:
   upstream: "http://..."
   service_name: usdt_listening
   service_port: 80
+
+service:
+  token_key: 02b3e560f25f4d0db54c9fa4519c7c24

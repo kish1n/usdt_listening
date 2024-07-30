@@ -23,7 +23,7 @@ func Run(args []string) bool {
 	app := kingpin.New("usdt_listening", "")
 
 	runCmd := app.Command("run", "run command")
-	serviceCmd := runCmd.Command("service", "run service") // you can insert custom help
+	serviceCmd := runCmd.Command("service", "run service")
 
 	migrateCmd := app.Command("migrate", "migrate command")
 	migrateUpCmd := migrateCmd.Command("up", "migrate db up")
@@ -32,6 +32,7 @@ func Run(args []string) bool {
 	// custom commands go here...
 
 	cmd, err := app.Parse(args[1:])
+
 	if err != nil {
 		log.WithError(err).Error("failed to parse arguments")
 		return false
@@ -41,8 +42,10 @@ func Run(args []string) bool {
 	case serviceCmd.FullCommand():
 		service.Run(cfg)
 	case migrateUpCmd.FullCommand():
+		//docker-compose run app migrate up
 		err = MigrateUp(cfg)
 	case migrateDownCmd.FullCommand():
+		//docker-compose run app migrate down
 		err = MigrateDown(cfg)
 
 	// handle any custom commands here in the same way

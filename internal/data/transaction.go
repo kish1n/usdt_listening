@@ -1,16 +1,19 @@
 package data
 
-import "time"
+import (
+	"time"
+)
 
 type TransactionQ interface {
 	Insert(trn TransactionData) (*TransactionData, error)
-	SortByParameter(address string, parameter string) ([]TransactionData, error)
+	FilterBySender(address string) ([]TransactionData, error)
+	FilterByRecipient(address string) ([]TransactionData, error)
 }
 
 type TransactionData struct {
-	FromAddress string    `db:"from_address" json:"id"`
-	ToAddress   string    `db:"to_address"   json:"from_address"`
-	Value       int64     `db:"value"        json:"to_address"`
-	Id          string    `db:"id"           json:"value"`
-	Timestamp   time.Time `db:"timestamp"    json:"timestamp"`
+	Sender    string    `db:"sender"       json:"sender"`
+	Recipient string    `db:"recipient"    json:"recipient"`
+	Value     int64     `db:"value"        json:"value"`
+	Id        string    `db:"id"           json:"id"`
+	Timestamp time.Time `db:"timestamp"    json:"timestamp"`
 }

@@ -96,25 +96,25 @@ func ListenForTransfers(w http.ResponseWriter, r *http.Request) {
 			transferEvent.To = common.HexToAddress(vLog.Topics[2].Hex())
 
 			stmt := data.TransactionData{
-				FromAddress: transferEvent.From.Hex(),
-				ToAddress:   transferEvent.To.Hex(),
-				Value:       transferEvent.Value.Int64(),
-				Id:          helpers.GenerateUUID(),
-				Timestamp:   time.Now(),
+				Sender:    transferEvent.From.Hex(),
+				Recipient: transferEvent.To.Hex(),
+				Value:     transferEvent.Value.Int64(),
+				Id:        helpers.GenerateUUID(),
+				Timestamp: time.Now(),
 			}
 
 			test := structs.Map(stmt)
 			logger.Infof("test %s", test)
 
-			res, err := db.Link().Insert(stmt)
+			res, err := db.NewTransaction().Insert(stmt)
 
 			if err != nil {
 				apierrors.ErrorConstructor(w, *logger, err, "Server error", "500", "Server error 500", "Unpredictable behavior")
 				return
 			}
 
-			logger.Infof("Transfer event: from %s to %s for %d tokens", res.FromAddress,
-				res.ToAddress, res.Value)
+			logger.Infof("Transfer event: from %s to %s for %d tokens", res.Sender,
+				res.Recipient, res.Value)
 		}
 	}
 }

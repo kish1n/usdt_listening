@@ -18,11 +18,11 @@ type masterQ struct {
 	db *pgdb.DB
 }
 
-func (m *masterQ) New() data.MasterQ {
+func (m *masterQ) NewMaster() data.MasterQ {
 	return NewMasterQ(m.db)
 }
 
-func (m *masterQ) Link() data.TransactionQ {
+func (m *masterQ) NewTransaction() data.TransactionQ {
 	return newTransactionQ(m.db)
 }
 

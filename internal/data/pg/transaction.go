@@ -33,9 +33,20 @@ func (q *TransactionQ) Insert(trn data.TransactionData) (*data.TransactionData, 
 	return &result, nil
 }
 
-func (q *TransactionQ) SortByParameter(address string, parameter string) ([]data.TransactionData, error) {
+func (q *TransactionQ) FilterBySender(address string) ([]data.TransactionData, error) {
 	var result []data.TransactionData
-	stmt := sq.Select("*").From(tableName).Where(sq.Eq{parameter: address})
+	stmt := sq.Select("*").From(tableName).Where(sq.Eq{"sender": address})
+	err := q.db.Select(&result, stmt)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to select by origin link in db")
+	}
+
+	return result, nil
+}
+
+func (q *TransactionQ) FilterByRecipient(address string) ([]data.TransactionData, error) {
+	var result []data.TransactionData
+	stmt := sq.Select("*").From(tableName).Where(sq.Eq{"recipient": address})
 	err := q.db.Select(&result, stmt)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to select by origin link in db")

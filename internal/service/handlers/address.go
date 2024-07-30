@@ -11,8 +11,8 @@ import (
 func SortBySender(w http.ResponseWriter, r *http.Request) {
 	logger := helpers.Log(r)
 	db := helpers.DB(r)
-	address, err := helpers.GetAddress(r, "from_address")
-	res, err := db.Link().SortByParameter(address, "from_address")
+	address, err := helpers.GetAddress(r, "sender")
+	res, err := db.NewTransaction().FilterBySender(address)
 
 	if res == nil {
 		apierrors.ErrorConstructor(w, *logger, err, "404 not found", "404", "Not Found", "Not found transaction from this address")
@@ -33,8 +33,8 @@ func SortByRecipient(w http.ResponseWriter, r *http.Request) {
 	logger := helpers.Log(r)
 	db := helpers.DB(r)
 
-	address, err := helpers.GetAddress(r, "to_address")
-	res, err := db.Link().SortByParameter(address, "to_address")
+	address, err := helpers.GetAddress(r, "recipient")
+	res, err := db.NewTransaction().FilterByRecipient(address)
 
 	if res == nil {
 		apierrors.ErrorConstructor(w, *logger, err, "404 not found", "404", "Not Found", "Not found transaction to this address")
@@ -56,8 +56,8 @@ func SortByAddress(w http.ResponseWriter, r *http.Request) {
 	db := helpers.DB(r)
 
 	address, err := helpers.GetAddress(r, "address")
-	start, err := db.Link().SortByParameter(address, "to_address")
-	end, err := db.Link().SortByParameter(address, "from_address")
+	start, err := db.NewTransaction().FilterByRecipient(address)
+	end, err := db.NewTransaction().FilterBySender(address)
 
 	if end == nil && start == nil {
 		apierrors.ErrorConstructor(w, *logger, err, "404 not found", "404", "Not Found", "Not found transaction at this address")

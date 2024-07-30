@@ -20,13 +20,14 @@ func (s *service) router(cfg config.Config) (chi.Router, error) {
 		ape.CtxMiddleware(
 			helpers.CtxLog(s.log),
 			helpers.CtxDB(pg.NewMasterQ(cfg.DB())),
+			helpers.CtxServiceConfig(cfg.ServiceConfig()),
 		),
 	)
 
 	r.Route("/", func(r chi.Router) {
 		r.Get("/listen", handlers.ListenForTransfers)
-		r.Get("/from/{from_address}", handlers.SortBySender)
-		r.Get("/to/{to_address}", handlers.SortByRecipient)
+		r.Get("/from/{sender}", handlers.SortBySender)
+		r.Get("/to/{recipient}", handlers.SortByRecipient)
 		r.Get("/by/{address}", handlers.SortByAddress)
 	})
 

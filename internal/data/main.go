@@ -6,9 +6,9 @@ import (
 )
 
 type MasterQ interface {
-	New() MasterQ
+	NewMaster() MasterQ
 
-	Link() TransactionQ
+	NewTransaction() TransactionQ
 
 	Transaction(fn func(db MasterQ) error) error
 }
