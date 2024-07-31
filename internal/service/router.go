@@ -8,6 +8,7 @@ import (
 	"github.com/kish1n/usdt_listening/internal/service/helpers"
 	"gitlab.com/distributed_lab/ape"
 	"net/http"
+	"sync"
 )
 
 func (s *service) router(cfg config.Config) (chi.Router, error) {
@@ -23,6 +24,13 @@ func (s *service) router(cfg config.Config) (chi.Router, error) {
 			helpers.CtxServiceConfig(cfg.ServiceConfig()),
 		),
 	)
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		handlers.ListenTransfers(cfg)
+	}()
 
 	r.Route("/", func(r chi.Router) {
 		r.Get("/from/{sender}", handlers.SortBySender)

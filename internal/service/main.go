@@ -13,6 +13,7 @@ type service struct {
 	log      *logan.Entry
 	copus    types.Copus
 	listener net.Listener
+	cfg      config.Config
 }
 
 func (s *service) run(cfg config.Config) error {

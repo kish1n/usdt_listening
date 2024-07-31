@@ -15,12 +15,12 @@ func SortBySender(w http.ResponseWriter, r *http.Request) {
 	res, err := db.NewTransaction().FilterBySender(address)
 
 	if res == nil {
-		apierrors.ErrorConstructor(w, *logger, err, "404 not found", "404", "Not Found", "Not found transaction from this address")
+		apierrors.ResponseErrorConst(w, *logger, err, "404 not found", "404", "Not Found", "Not found transaction from this address")
 		return
 	}
 
 	if err != nil {
-		apierrors.ErrorConstructor(w, *logger, err, "Server error", "500", "Server error 500", "Unpredictable behavior")
+		apierrors.ResponseErrorConst(w, *logger, err, "Server error", "500", "Server error 500", "Unpredictable behavior")
 		return
 	}
 
@@ -37,12 +37,12 @@ func SortByRecipient(w http.ResponseWriter, r *http.Request) {
 	res, err := db.NewTransaction().FilterByRecipient(address)
 
 	if res == nil {
-		apierrors.ErrorConstructor(w, *logger, err, "404 not found", "404", "Not Found", "Not found transaction to this address")
+		apierrors.ResponseErrorConst(w, *logger, err, "404 not found", "404", "Not Found", "Not found transaction to this address")
 		return
 	}
 
 	if err != nil {
-		apierrors.ErrorConstructor(w, *logger, err, "Server error", "500", "Server error 500", "Unpredictable behavior")
+		apierrors.ResponseErrorConst(w, *logger, err, "Server error", "500", "Server error 500", "Unpredictable behavior")
 		return
 	}
 
@@ -60,12 +60,12 @@ func SortByAddress(w http.ResponseWriter, r *http.Request) {
 	end, err := db.NewTransaction().FilterBySender(address)
 
 	if end == nil && start == nil {
-		apierrors.ErrorConstructor(w, *logger, err, "404 not found", "404", "Not Found", "Not found transaction at this address")
+		apierrors.ResponseErrorConst(w, *logger, err, "404 not found", "404", "Not Found", "Not found transaction at this address")
 		return
 	}
 
 	if err != nil {
-		apierrors.ErrorConstructor(w, *logger, err, "Server error", "500", "Server error 500", "Unpredictable behavior")
+		apierrors.ResponseErrorConst(w, *logger, err, "Server error", "500", "Server error 500", "Unpredictable behavior")
 		return
 	}
 
